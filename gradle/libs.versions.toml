@@ -1,0 +1,45 @@
+[versions]
+jme = "3.9.0-stable"
+
+appcompat = "1.4.0"
+googleMaterial = "1.4.0"
+constraintlayout = "2.1.1"
+junit4 = "4.13.2"
+androidxTestJunit = "1.1.3"
+espressoCore = "3.4.0"
+
+heart = '8.6.0'
+minie = '7.7.0'
+renthylcore = '2.0.1-alpha'
+renthyljme = '2.0.1-alpha'
+wes = '0.7.2'
+particlemonkey = '1.0.2'
+lemur = '1.16.0'
+lemur-proto = '1.13.0'
+
+[plugins]
+
+[libraries]
+jmeCore = { module = "org.jmonkeyengine:jme3-core", version.ref = "jme" }
+jmeJogg = { module = "org.jmonkeyengine:jme3-jogg", version.ref = "jme" }
+jmePlugins = { module = "org.jmonkeyengine:jme3-plugins", version.ref = "jme" }
+jmeDesktop = { module = "org.jmonkeyengine:jme3-desktop", version.ref = "jme" }
+jmeEffects = { module = "org.jmonkeyengine:jme3-effects", version.ref = "jme" }
+jmeLwjgl3 = { module = "org.jmonkeyengine:jme3-lwjgl3", version.ref = "jme" }
+jmeTerrain = { module = "org.jmonkeyengine:jme3-terrain", version.ref = "jme" }
+jmeNetworking = { module = "org.jmonkeyengine:jme3-networking", version.ref = "jme" }
+jmeNifty = { module = "org.jmonkeyengine:jme3-niftygui", version.ref = "jme" }
+jmeAndroid = { module = "org.jmonkeyengine:jme3-android", version.ref = "jme" }
+jmeAndroidNative = { module = "org.jmonkeyengine:jme3-android-native", version.ref = "jme" }
+
+
+
+
+heart = { module = 'com.github.stephengold:Heart', version.ref ='heart' }
+minie = { module = 'com.github.stephengold:Minie', version.ref ='minie' }
+renthylcore = { module = 'com.github.codex128.Renthyl:RenthylCore', version.ref ='renthylcore' }
+renthyljme = { module = 'com.github.codex128.Renthyl:RenthylJme', version.ref ='renthyljme' }
+wes = { module = 'com.github.stephengold:Wes', version.ref ='wes' }
+particlemonkey = { module = 'com.github.Jeddic:particlemonkey', version.ref ='particlemonkey' }
+lemur = { module = 'com.simsilica:lemur', version.ref ='lemur' }
+lemur-proto = { module = 'com.simsilica:lemur-proto', version.ref ='lemur-proto' }
