@@ -1,0 +1,10 @@
+/.gradle/
+/.idea/
+/.nb-gradle/
+/build/
+/nbproject/
+/private/
+/Written Assets/
+/*.dll
+/*.dylib
+/*.so
