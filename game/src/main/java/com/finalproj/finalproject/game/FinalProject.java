@@ -11,9 +11,12 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.BetterCharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
+
 
 
 /**
@@ -27,7 +30,7 @@ public class FinalProject extends SimpleApplication implements ActionListener {
     BulletAppState bulletAppState;
     BetterCharacterControl playerControl;
     Node playerNode;
-    
+    Equippable tool;
 
     public FinalProject() {
     }
@@ -42,14 +45,15 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D));
         inputManager.addMapping("Up",    new KeyTrigger(KeyInput.KEY_W));
         inputManager.addMapping("Down",  new KeyTrigger(KeyInput.KEY_S));
+        inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
     
 
-        inputManager.addListener(this, "Jump", "Left", "Right", "Up", "Down");
+        inputManager.addListener(this, "Jump", "Left", "Right", "Up", "Down", "Click");
     }
     
 
     private Vector3f walkDirection = new Vector3f();
-    private boolean left = false, right = false, up = false, down = false;
+    private boolean left = false, right = false, up = false, down = false, click = false;
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
@@ -57,10 +61,11 @@ public class FinalProject extends SimpleApplication implements ActionListener {
             playerControl.jump();
         }
 
-        if (name.equals("Left"))  { left  = isPressed; System.out.println("L");}
+        if (name.equals("Left"))  { left  = isPressed; }
         if (name.equals("Right")) { right = isPressed; }
         if (name.equals("Up"))    { up    = isPressed; }
-        if (name.equals("Down"))  { down  = isPressed; }
+        if (name.equals("Down"))  { down  = isPressed; System.out.println("test");}
+        if (name.equals("Click")) { click = isPressed; System.out.println("ini");}
     }
 
     @Override
@@ -70,9 +75,10 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         walkDirection.set(0, 0, 0);
     
         if (left)  { walkDirection.addLocal(camLeft); }
-        if (right) { walkDirection.addLocal(camLeft.negateLocal()); }
+        if (right) { walkDirection.addLocal(camLeft.mult(-1f)); }
+        if (down)  { walkDirection.addLocal(camDir.mult(-1f)); }
         if (up)    { walkDirection.addLocal(camDir); }
-        if (down)  { walkDirection.addLocal(camDir.negateLocal()); }
+        if (click) { tool.shoot(camDir, playerNode);}
     
         // This actually moves the physical character
         playerControl.setWalkDirection(walkDirection.multLocal(15f)); 
@@ -111,7 +117,7 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         playerGeo.setMaterial(playerMat);
         playerNode.attachChild(playerGeo);
 
-        rootNode.attachChild(playerGeo);
+        rootNode.attachChild(playerNode);
         bulletAppState.getPhysicsSpace().add(playerControl);
 
         playerControl.setJumpForce(new Vector3f(0, 5f, 0));
@@ -120,7 +126,16 @@ public class FinalProject extends SimpleApplication implements ActionListener {
 
 
         flyCam.setMoveSpeed(0);
+
+
+        tool = new Grapple(assetManager, bulletAppState, floorPhy);
+
         initKeys();
     }
 
+
+    public static void main(String[] args) {
+        FinalProject app = new FinalProject();
+        app.start();
+    }
 }
