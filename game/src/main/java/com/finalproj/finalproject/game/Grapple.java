@@ -33,46 +33,41 @@ public class Grapple implements Equippable
 
 
     public void shoot(Vector3f angle, Node player) {
-
+        System.err.println("dsnjns");
         CollisionResults results = new CollisionResults();
-
-        Ray ray = new Ray(player.getLocalTranslation(), angle);
-
-        player.collideWith(ray, results);
-
-        System.out.println("shot...");
-
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
             Vector3f hookPoint = closest.getContactPoint();
-
+            
+            float ropeLength = player.getWorldTranslation().distance(hookPoint);
+        
             Line line = new Line(player.getWorldTranslation(), hookPoint);
             Geometry ropeGeom = new Geometry("Rope", line);
             Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             mat.setColor("Color", ColorRGBA.White);
             ropeGeom.setMaterial(mat);
-            player.attachChild(ropeGeom);
-
-            staticHolder = new RigidBodyControl(0.0f); 
-            anchorNode = new Node("AnchorNode");
-
-            anchorNode.addControl(staticHolder);
-            player.attachChild(anchorNode);
-            bulletAppState.getPhysicsSpace().add(staticHolder);
-
-            SixDofJoint ropeJoint = new SixDofJoint(playerPhys, staticHolder, 
-                        Vector3f.ZERO, Vector3f.ZERO, true);
-
-            Vector3f lowerLimit = new Vector3f(0, 0, 0);
-            Vector3f upperLimit = new Vector3f(10, 10, 10); //make it not hardcoded
             
-            ropeJoint.setLinearLowerLimit(lowerLimit);
-            ropeJoint.setLinearUpperLimit(upperLimit);
+            player.attachChild(ropeGeom); 
+        
+            anchorNode = new Node("AnchorNode");
+            anchorNode.setLocalTranslation(hookPoint);
+            player.attachChild(anchorNode);
+        
+            staticHolder = new RigidBodyControl(0.0f); 
+            anchorNode.addControl(staticHolder);
+            bulletAppState.getPhysicsSpace().add(staticHolder);
+        
+            Vector3f pivotA = Vector3f.ZERO;
+            Vector3f pivotB = Vector3f.ZERO;
+        
+            SixDofJoint ropeJoint = new SixDofJoint(playerPhys, staticHolder, pivotA, pivotB, false);
+        
+            ropeJoint.setLinearLowerLimit(new Vector3f(0, 0, 0));
+            ropeJoint.setLinearUpperLimit(new Vector3f(ropeLength, ropeLength, ropeLength));
             
             bulletAppState.getPhysicsSpace().add(ropeJoint);
-
-
-            System.out.println("hit!");
+        
+            System.out.println("Hooked at dist: " + ropeLength);
         }
 
 
