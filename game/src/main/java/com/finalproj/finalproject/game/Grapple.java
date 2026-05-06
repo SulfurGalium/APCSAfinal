@@ -14,6 +14,7 @@ import com.jme3.bullet.joints.SixDofJoint;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.material.Material;
+import com.jme3.bullet.animation.RangeOfMotion;
 
 
 public class Grapple implements Equippable
@@ -23,21 +24,24 @@ public class Grapple implements Equippable
     private RigidBodyControl staticHolder;
     private Node anchorNode;
     private RigidBodyControl playerPhys;
+    private Node rnode;
 
 
-    public Grapple(AssetManager a, BulletAppState b, RigidBodyControl r) {
+    public Grapple(AssetManager a, BulletAppState b, RigidBodyControl r, Node rn) {
         assetManager = a;
         bulletAppState = b;
         playerPhys = r;
+        rnode = rn;
     }
 
 
     public void shoot(Vector3f angle, Node player) {
-        System.err.println("dsnjns");
+;
         CollisionResults results = new CollisionResults();
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
             Vector3f hookPoint = closest.getContactPoint();
+            Node rootNode = new Node();
             
             float ropeLength = player.getWorldTranslation().distance(hookPoint);
         
@@ -47,16 +51,20 @@ public class Grapple implements Equippable
             mat.setColor("Color", ColorRGBA.White);
             ropeGeom.setMaterial(mat);
             
-            player.attachChild(ropeGeom); 
+            rootNode.attachChild(ropeGeom); 
         
             anchorNode = new Node("AnchorNode");
+            rootNode.attachChild(anchorNode);
             anchorNode.setLocalTranslation(hookPoint);
-            player.attachChild(anchorNode);
+            
         
             staticHolder = new RigidBodyControl(0.0f); 
             anchorNode.addControl(staticHolder);
             bulletAppState.getPhysicsSpace().add(staticHolder);
         
+            RigidBodyControl anchorPhys = new RigidBodyControl(0.0f);
+            anchorNode.addControl(anchorPhys);
+
             Vector3f pivotA = Vector3f.ZERO;
             Vector3f pivotB = Vector3f.ZERO;
         
@@ -65,7 +73,9 @@ public class Grapple implements Equippable
             ropeJoint.setLinearLowerLimit(new Vector3f(0, 0, 0));
             ropeJoint.setLinearUpperLimit(new Vector3f(ropeLength, ropeLength, ropeLength));
             
-            bulletAppState.getPhysicsSpace().add(ropeJoint);
+            bulletAppState.getPhysicsSpace().add(anchorPhys);
+
+            RangeOfMotion.setupJoint(anchorPhys, player.getControl(RigidBodyControl.class));
         
             System.out.println("Hooked at dist: " + ropeLength);
         }

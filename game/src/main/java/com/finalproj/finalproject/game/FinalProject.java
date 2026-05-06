@@ -128,7 +128,7 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         flyCam.setMoveSpeed(0);
 
 
-        tool = new Grapple(assetManager, bulletAppState, floorPhy);
+        tool = new Grapple(assetManager, bulletAppState, floorPhy, rootNode);
 
         initKeys();
     }
