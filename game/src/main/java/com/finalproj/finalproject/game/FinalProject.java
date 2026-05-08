@@ -66,6 +66,7 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         if (name.equals("Up"))    { up    = isPressed; }
         if (name.equals("Down"))  { down  = isPressed; }
         if (name.equals("Click")) {
+            click = isPressed;
             if (tool instanceof Grapple) {
                 Grapple grapple = (Grapple) tool;
 
@@ -103,12 +104,12 @@ public class FinalProject extends SimpleApplication implements ActionListener {
     public void simpleInitApp() {
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        Box floorBox = new Box(10f, 0.1f, 10f);
+        Box floorBox = new Box(10f, 0.2f, 10f);
         Geometry floorGeo = new Geometry("Floor", floorBox);
         Material floorMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         floorMat.setColor("Color", ColorRGBA.Blue);
         floorGeo.setMaterial(floorMat);
-        floorGeo.setLocalTranslation(0, -0.1f, 0);
+        floorGeo.setLocalTranslation(0, -1f, 0);
         rootNode.attachChild(floorGeo);
 
         RigidBodyControl floorPhy = new RigidBodyControl(0.0f);
@@ -130,7 +131,7 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         rootNode.attachChild(playerNode);
         bulletAppState.getPhysicsSpace().add(playerControl);
 
-        playerControl.setJumpForce(new Vector3f(0, 5f, 0));
+        playerControl.setJumpForce(new Vector3f(0, 15f, 0));
         playerControl.setGravity(new Vector3f(0,-9.8f,0));
         playerControl.warp(new Vector3f(0,5,0));
 

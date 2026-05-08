@@ -48,10 +48,26 @@ public class Grapple implements Equippable
         Ray ray = new Ray(player.getWorldTranslation(), direction);
         rootNode.collideWith(ray, results);
 
+        CollisionResult hit = null;
+
+        for (CollisionResult r : results) {
+            if (!r.getGeometry().hasAncestor(player)) {
+                hit = r;
+                break;
+            }
+        }
+
+        if (hit == null) {
+            return;
+        }
+
         
         if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            Vector3f hookPoint = closest.getContactPoint();
+            //CollisionResult closest = results.getClosestCollision();
+            //Vector3f hookPoint = closest.getContactPoint();
+
+            Vector3f hookPoint = hit.getContactPoint();
+
 
             anchorNode = new Node("AnchorNode");
             rootNode.attachChild(anchorNode);
@@ -70,12 +86,24 @@ public class Grapple implements Equippable
 
             ropeJoint = new SixDofJoint(anchorPhys, playerBody, Vector3f.ZERO, new Vector3f(0, 1f, 0), true);
 
-            float distance = player.getWorldTranslation().distance(hookPoint);
-            ropeJoint.setLinearUpperLimit(new Vector3f(distance, distance, distance));
-            ropeJoint.setLinearLowerLimit(new Vector3f(-distance, -distance, -distance));
+            ropeJoint.getTranslationalLimitMotor().setLowerLimit(Vector3f.ZERO);
+            ropeJoint.getTranslationalLimitMotor().setUpperLimit(Vector3f.ZERO);
 
-            ropeJoint.setAngularUpperLimit(new Vector3f(FastMath.HALF_PI, FastMath.HALF_PI, FastMath.HALF_PI));
-            ropeJoint.setAngularLowerLimit(new Vector3f(-FastMath.HALF_PI, -FastMath.HALF_PI, -FastMath.HALF_PI));
+            ropeJoint.getRotationalLimitMotor(0).setLowerLimit(-FastMath.PI);
+            ropeJoint.getRotationalLimitMotor(0).setUpperLimit(FastMath.PI);
+
+            ropeJoint.getRotationalLimitMotor(1).setLowerLimit(-FastMath.PI);
+            ropeJoint.getRotationalLimitMotor(1).setUpperLimit(FastMath.PI);
+
+            ropeJoint.getRotationalLimitMotor(2).setLowerLimit(-FastMath.PI);
+            ropeJoint.getRotationalLimitMotor(2).setUpperLimit(FastMath.PI);
+
+            float distance = player.getWorldTranslation().distance(hookPoint);
+            //ropeJoint.setLinearUpperLimit(new Vector3f(distance, distance, distance));
+            //ropeJoint.setLinearLowerLimit(new Vector3f(-distance, -distance, -distance));
+
+            //ropeJoint.setAngularUpperLimit(new Vector3f(FastMath.HALF_PI, FastMath.HALF_PI, FastMath.HALF_PI));
+            //ropeJoint.setAngularLowerLimit(new Vector3f(-FastMath.HALF_PI, -FastMath.HALF_PI, -FastMath.HALF_PI));
 
             bulletAppState.getPhysicsSpace().add(ropeJoint);
 
