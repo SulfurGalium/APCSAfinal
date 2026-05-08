@@ -4,13 +4,16 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.scene.shape.Line;
 import com.jme3.math.Ray;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.control.BetterCharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.joints.HingeJoint;
 import com.jme3.bullet.joints.SixDofJoint;
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.material.Material;
@@ -24,7 +27,8 @@ public class Grapple implements Equippable
     private Node anchorNode;
     private RigidBodyControl playerPhys;
     private Node rootNode;
-
+    private SixDofJoint ropeJoint;
+    private boolean isGrappling = false;
 
     public Grapple(AssetManager a, BulletAppState b, RigidBodyControl r, Node rn) {
         assetManager = a;
@@ -35,6 +39,10 @@ public class Grapple implements Equippable
 
 
     public void shoot(Vector3f direction, Node player) {
+        if (isGrappling) {
+            return;
+        }
+
         CollisionResults results = new CollisionResults();
 
         Ray ray = new Ray(player.getWorldTranslation(), direction);
@@ -51,38 +59,29 @@ public class Grapple implements Equippable
             
             RigidBodyControl anchorPhys = new RigidBodyControl(0.0f);
             anchorNode.addControl(anchorPhys);
-            
-            float ropeLength = player.getWorldTranslation().distance(hookPoint);
-        
-            Line line = new Line(player.getWorldTranslation(), hookPoint);
-            Geometry ropeGeom = new Geometry("Rope", line);
-            Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.White);
-            ropeGeom.setMaterial(mat);
-            
-            rootNode.attachChild(ropeGeom); 
-        
-
-        
-            staticHolder = new RigidBodyControl(0.0f); 
-            anchorNode.addControl(staticHolder);
-            bulletAppState.getPhysicsSpace().add(staticHolder);
-        
-
-
-            Vector3f pivotA = Vector3f.ZERO;
-            Vector3f pivotB = Vector3f.ZERO;
-        
-            SixDofJoint ropeJoint = new SixDofJoint(playerPhys, staticHolder, pivotA, pivotB, false);
-        
-            ropeJoint.setLinearLowerLimit(new Vector3f(0, 0, 0));
-            ropeJoint.setLinearUpperLimit(new Vector3f(ropeLength, ropeLength, ropeLength));
-            
             bulletAppState.getPhysicsSpace().add(anchorPhys);
+            
+            BetterCharacterControl playerControl = player.getControl(BetterCharacterControl.class);
+            if (playerControl == null) {
+                System.err.println("is player init?");
+                return;
+            }
+            PhysicsRigidBody playerBody = playerControl.getRigidBody();
 
-            RangeOfMotion.setupJoint(anchorPhys, player.getControl(RigidBodyControl.class));
-        
-            System.out.println("Hooked at dist: " + ropeLength);
+            ropeJoint = new SixDofJoint(anchorPhys, playerBody, Vector3f.ZERO, new Vector3f(0, 1f, 0), true);
+
+            float distance = player.getWorldTranslation().distance(hookPoint);
+            ropeJoint.setLinearUpperLimit(new Vector3f(distance, distance, distance));
+            ropeJoint.setLinearLowerLimit(new Vector3f(-distance, -distance, -distance));
+
+            ropeJoint.setAngularUpperLimit(new Vector3f(FastMath.HALF_PI, FastMath.HALF_PI, FastMath.HALF_PI));
+            ropeJoint.setAngularLowerLimit(new Vector3f(-FastMath.HALF_PI, -FastMath.HALF_PI, -FastMath.HALF_PI));
+
+            bulletAppState.getPhysicsSpace().add(ropeJoint);
+
+            System.out.println("Hooked at: " + distance);
+
+            isGrappling = true;
         }
 
 
@@ -91,5 +90,25 @@ public class Grapple implements Equippable
 
     public void equip() {
 
+    }
+
+    public void release() {
+        if (!isGrappling) {
+            return;
+        }
+
+        if (ropeJoint != null) {
+            bulletAppState.getPhysicsSpace().remove(ropeJoint);
+        }
+
+        if (anchorNode != null) {
+            RigidBodyControl anchorPhys = anchorNode.getControl(RigidBodyControl.class);
+            if (anchorPhys != null) {
+                bulletAppState.getPhysicsSpace().remove(anchorPhys);
+            }
+            anchorNode.removeFromParent();
+        }
+
+        isGrappling = false;
     }
 }

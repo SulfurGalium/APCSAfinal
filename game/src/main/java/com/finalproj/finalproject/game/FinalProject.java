@@ -64,8 +64,18 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         if (name.equals("Left"))  { left  = isPressed; }
         if (name.equals("Right")) { right = isPressed; }
         if (name.equals("Up"))    { up    = isPressed; }
-        if (name.equals("Down"))  { down  = isPressed; System.out.println("test");}
-        if (name.equals("Click")) { click = isPressed; System.out.println("ini");}
+        if (name.equals("Down"))  { down  = isPressed; }
+        if (name.equals("Click")) {
+            if (tool instanceof Grapple) {
+                Grapple grapple = (Grapple) tool;
+
+                if (isPressed) {
+                    grapple.shoot(cam.getDirection(), playerNode);
+                } else {
+                    grapple.release();
+                }
+            }
+        }
     }
 
     @Override
@@ -121,7 +131,7 @@ public class FinalProject extends SimpleApplication implements ActionListener {
         bulletAppState.getPhysicsSpace().add(playerControl);
 
         playerControl.setJumpForce(new Vector3f(0, 5f, 0));
-        playerControl.setGravity(new Vector3f(0,-4.9f,0));
+        playerControl.setGravity(new Vector3f(0,-9.8f,0));
         playerControl.warp(new Vector3f(0,5,0));
 
 
