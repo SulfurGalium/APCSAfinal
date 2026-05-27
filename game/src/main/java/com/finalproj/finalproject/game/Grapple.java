@@ -1,22 +1,17 @@
 package com.finalproj.finalproject.game;
 
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.scene.shape.Line;
-import com.jme3.math.Ray;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.BetterCharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.joints.HingeJoint;
 import com.jme3.bullet.joints.SixDofJoint;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
-import com.jme3.material.Material;
+import com.jme3.math.FastMath;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
 
 public class Grapple implements Equippable
@@ -45,7 +40,10 @@ public class Grapple implements Equippable
 
         CollisionResults results = new CollisionResults();
 
-        Ray ray = new Ray(player.getWorldTranslation(), direction);
+        Vector3f normDirection = direction.normalize();
+
+        Ray ray = new Ray(player.getWorldTranslation(), normDirection);
+        ray.setLimit(65f);
         rootNode.collideWith(ray, results);
 
         CollisionResult hit = null;
