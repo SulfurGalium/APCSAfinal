@@ -6,15 +6,16 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
+        mavenCentral() // Always try here first
         maven { url "https://jitpack.io" }
-        mavenCentral()
-        mavenLocal()
     }
 }
+
 rootProject.name = "FinalProject"
 include ':desktop'
 

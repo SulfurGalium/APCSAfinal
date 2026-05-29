@@ -1,9 +1,15 @@
 plugins {
     id 'java-library'
-    id "io.github.0ffz.github-packages" version "1.2.1" // Plugin for anonymous inclusion of artifacts hosted in github package registry
+    id "io.github.0ffz.github-packages" version "1.2.1"
+}
+
+// Ensure the Java Library plugin features are explicitly ready to handle 'api'
+java {
+    withSourcesJar()
 }
 
 dependencies {
+    // Core Engine Configurations
     api libs.jmeCore
     runtimeOnly libs.jmeJogg
     runtimeOnly libs.jmePlugins
@@ -12,15 +18,15 @@ dependencies {
     api libs.jmeTerrain
     api libs.jmeNetworking
 
-
+    // Project Engine Extensions
     api libs.heart
     api libs.minie
     api libs.renthylcore
     api libs.renthyljme
-    api libs.minie
-    api libs.minie
+    
     api libs.wes
     api libs.particlemonkey
     api libs.lemur
     api libs.lemur.proto
+    implementation "org.jmonkeyengine:jme3-testdata:3.6.1-stable"
 }

@@ -8,12 +8,19 @@ import com.jme3.bullet.joints.SixDofJoint;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.shape.Line;
 
-
+/**
+ * The grapple hook that reels the player in
+ * @authors Shreyan Ganguly, Aarush Jain
+ */
 public class Grapple implements Equippable
 {
     private AssetManager assetManager;
@@ -23,8 +30,19 @@ public class Grapple implements Equippable
     private RigidBodyControl playerPhys;
     private Node rootNode;
     private SixDofJoint ropeJoint;
+    private Line ropeLine;
+    private Geometry ropeLineGeometry;
+    private Vector3f hookPoint;
     private boolean isGrappling = false;
-
+    
+    
+    /**
+     * Creates the tool and allows it to interact with the physics space
+     * @param a
+     * @param b
+     * @param r
+     * @param rn 
+     */
     public Grapple(AssetManager a, BulletAppState b, RigidBodyControl r, Node rn) {
         assetManager = a;
         bulletAppState = b;
@@ -32,9 +50,14 @@ public class Grapple implements Equippable
         rootNode = rn;
     }
 
-
+    /**
+     * Shoots the grapple at set distance then reels the player in at that angle
+     * @param direction
+     * @param player 
+     */
     public void shoot(Vector3f direction, Node player) {
         if (isGrappling) {
+            updateRopeLine(player);
             return;
         }
 
@@ -64,7 +87,7 @@ public class Grapple implements Equippable
             //CollisionResult closest = results.getClosestCollision();
             //Vector3f hookPoint = closest.getContactPoint();
 
-            Vector3f hookPoint = hit.getContactPoint();
+            hookPoint = hit.getContactPoint();
 
 
             anchorNode = new Node("AnchorNode");
@@ -104,20 +127,40 @@ public class Grapple implements Equippable
             //ropeJoint.setAngularLowerLimit(new Vector3f(-FastMath.HALF_PI, -FastMath.HALF_PI, -FastMath.HALF_PI));
 
             bulletAppState.getPhysicsSpace().add(ropeJoint);
+            createRopeLine(player);
 
             System.out.println("Hooked at: " + distance);
 
             isGrappling = true;
         }
-
-
-
     }
 
-    public void equip() {
+    private void createRopeLine(Node player) {
+        ropeLine = new Line(player.getWorldTranslation(), hookPoint);
+        ropeLine.setLineWidth(3f);
 
+        ropeLineGeometry = new Geometry("GrappleLine", ropeLine);
+        Material ropeMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        ropeMat.setColor("Color", ColorRGBA.Yellow);
+        ropeLineGeometry.setMaterial(ropeMat);
+        rootNode.attachChild(ropeLineGeometry);
     }
 
+    private void updateRopeLine(Node player) {
+        if (ropeLine != null && hookPoint != null) {
+            ropeLine.updatePoints(player.getWorldTranslation(), hookPoint);
+        }
+    }
+
+    /**
+     * The method that happens when the tool is equipped
+     */
+    public void equip() {}
+    
+    
+    /**
+     * The method to delete and reset the grapple after releasing it
+     */
     public void release() {
         if (!isGrappling) {
             return;
@@ -135,6 +178,13 @@ public class Grapple implements Equippable
             anchorNode.removeFromParent();
         }
 
+        if (ropeLineGeometry != null) {
+            ropeLineGeometry.removeFromParent();
+            ropeLineGeometry = null;
+            ropeLine = null;
+        }
+
+        hookPoint = null;
         isGrappling = false;
     }
 }
